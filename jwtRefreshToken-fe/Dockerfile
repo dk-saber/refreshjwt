@@ -1,17 +1,18 @@
 # ---- Base ----
 FROM node:22-alpine AS base
 WORKDIR /app
+RUN corepack enable pnpm
 
 # ---- Dependencies ----
 FROM base AS deps
-COPY package*.json ./
-RUN npm ci --ignore-scripts
+COPY pnpm-lock.yaml package.json ./
+RUN pnpm install --frozen-lockfile
 
 # ---- Build ----
 FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+RUN pnpm run build
 
 # ---- Runtime ----
 FROM node:22-alpine AS runtime

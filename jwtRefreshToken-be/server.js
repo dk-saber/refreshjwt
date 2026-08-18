@@ -7,6 +7,8 @@ const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
 const cookieParser = require('cookie-parser');
 
+
+
 app.use(cors({
   origin: 'http://localhost:3000',          // l'origine exacte du frontend Nuxt
   credentials: true                         // autorise l'envoi/réception des cookies
