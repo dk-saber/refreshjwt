@@ -1,0 +1,45 @@
+# À placer à la racine d'un dossier contenant les deux projets en frères :
+#
+#   .
+#   ├── docker-compose.yml   (ce fichier)
+#   ├── jwtRefreshToken-be/
+#   └── jwtRefreshToken-fe/
+#
+# Lancement : docker compose up --build
+
+services:
+  api:
+    build:
+      context: ./jwtRefreshToken-be
+      dockerfile: Dockerfile
+    container_name: jwt-auth-api
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./jwtRefreshToken-be/.env
+    networks:
+      - jwtnet
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./jwtRefreshToken-fe
+      dockerfile: Dockerfile
+    container_name: jwt-auth-web
+    ports:
+      - "3000:3000"
+    environment:
+      # Côté serveur Nuxt (SSR) -> résolu via le réseau Docker interne,
+      # par le nom du service "api" (voir jwtRefreshToken-fe/app/composables/useApiBase.ts)
+      NUXT_API_BASE: http://api:5000/api
+      # Côté navigateur -> doit rester une URL joignable depuis la machine hôte
+      NUXT_PUBLIC_API_BASE: http://localhost:5000/api
+    depends_on:
+      - api
+    networks:
+      - jwtnet
+    restart: unless-stopped
+
+networks:
+  jwtnet:
+    driver: bridge
